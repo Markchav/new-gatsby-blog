@@ -1,6 +1,7 @@
 import * as React from "react"
-import { Link } from "gatsby"
+import { graphql, Link } from "gatsby"
 import { StaticImage } from "gatsby-plugin-image"
+import styled from "styled-components"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
@@ -69,7 +70,17 @@ const moreLinks = [
 
 const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter`
 
-const IndexPage = () => (
+const BlogLink = styled(Link)`
+  text-decoration: none;
+
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+  color: blue;
+`
+
+export default ({data}) => (
   <Layout>
     <div className={styles.textCenter}>
       <StaticImage
@@ -81,10 +92,24 @@ const IndexPage = () => (
         alt=""
         style={{ marginBottom: `var(--space-3)` }}
       />
-      <h1>
+      <div>
+        <h1>Mark's Blog Posts</h1>
+        <h4>{data.allMarkdownRemark.totalCount}</h4>
+        {
+          data.allMarkdownRemark.edges.map(({node})=> (
+            <div key= {node.id}>
+            <BlogLink to={node.fields.slug}>
+              <BlogTitle> {node.frontmatter.title} - {node.frontmatter.date}</BlogTitle>
+              </BlogLink>
+              <p> {node.excerpt}</p>
+            </div>
+          ))
+        }
+      </div>
+      {/* <h1>
         Welcome to <b>Gatsby!</b>
-      </h1>
-      <p className={styles.intro}>
+      </h1> */}
+      {/* <p className={styles.intro}>
         <b>Example pages:</b>{" "}
         {samplePageLinks.map((link, i) => (
           <React.Fragment key={link.url}>
@@ -94,9 +119,9 @@ const IndexPage = () => (
         ))}
         <br />
         Edit <code>src/pages/index.js</code> to update this page.
-      </p>
+      </p> */}
     </div>
-    <ul className={styles.list}>
+    {/* <ul className={styles.list}>
       {links.map(link => (
         <li key={link.url} className={styles.listItem}>
           <a
@@ -108,13 +133,13 @@ const IndexPage = () => (
           <p className={styles.listItemDescription}>{link.description}</p>
         </li>
       ))}
-    </ul>
-    {moreLinks.map((link, i) => (
-      <React.Fragment key={link.url}>
+    </ul> */}
+    {/* {moreLinks.map((link, i) => ( */}
+      {/* <React.Fragment key={link.url}>
         <a href={`${link.url}${utmParameters}`}>{link.text}</a>
         {i !== moreLinks.length - 1 && <> · </>}
-      </React.Fragment>
-    ))}
+      </React.Fragment> */}
+    {/* ))} */}
   </Layout>
 )
 
@@ -125,4 +150,24 @@ const IndexPage = () => (
  */
 export const Head = () => <Seo title="Home" />
 
-export default IndexPage
+export const query = graphql`
+query {
+  allMarkdownRemark(sort: {fields: [frontmatter___date], order: DESC}) {
+    totalCount
+    edges {
+      node {
+        id
+        frontmatter {
+          title
+          date
+          description
+        }
+        fields {
+          slug
+        }
+        excerpt
+      }
+    }
+  }
+}
+`
